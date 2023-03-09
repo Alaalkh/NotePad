@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity  implements NoteAdapter.Item
 
     public void updateNote(final Note note) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Name");
+        builder.setTitle("Note Details");
         final View customLayout = getLayoutInflater().inflate(R.layout.activity_update_note, null);
         builder.setView(customLayout);
         builder.setPositiveButton(
