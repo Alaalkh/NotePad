@@ -1,16 +1,19 @@
 package com.example.notepad;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -30,12 +33,17 @@ public class MainActivity extends AppCompatActivity  implements NoteAdapter.Item
     ArrayList<Note> items;
     NoteAdapter[] myListData;
     NoteAdapter adapter;
+    EditText Updatetitle;
+    EditText Updatenote;
     GridLayoutManager layoutManager = new GridLayoutManager(this,2);
     RecyclerView rv;
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Updatetitle=findViewById(R.id.Updatetitle);
+        Updatenote=findViewById(R.id.Updatenote);
         add=findViewById(R.id.addnote);
         rv = findViewById(R.id.recyclr);
         items = new ArrayList<Note>();
@@ -108,14 +116,43 @@ public class MainActivity extends AppCompatActivity  implements NoteAdapter.Item
                     }
                 });
     }
-    @Override
+
+    public void updateNote(final Note note) {
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Name");
+        final View customLayout = getLayoutInflater().inflate(R.layout.activity_update_note, null);
+        builder.setView(customLayout);
+        builder.setPositiveButton(
+                "Update",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        Updatetitle = customLayout.findViewById(R.id.Updatetitle);
+                        Updatenote = customLayout.findViewById(R.id.Updatenote);
+
+                        db.collection("Notes").document(note.getId()).update("title", Updatetitle.getText().toString(),"note",Updatenote.getText().toString())
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Log.d("dareen", "DocumentSnapshot successfully updated!");
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Log.w("dareen", "Error updating document", e);
+                                    }
+                                });
+                    }
+                });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
     public void onItemClick(int position, String id) {
         Delete(items.get(position));
     }
 
     @Override
     public void onItemClick2(int position, String id) {
-        Intent intent= new Intent(this,UpdateNote.class);
-        startActivity(intent);
+        updateNote(items.get(position));
     }
 }
